@@ -28,6 +28,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if (!auth()->user()->approved) {
+            Auth::logout();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Your account is pending admin approval.',
+            ]);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
