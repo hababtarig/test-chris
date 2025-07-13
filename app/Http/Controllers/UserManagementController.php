@@ -53,4 +53,15 @@ class UserManagementController extends Controller
         $user->delete();
         return back()->with('status', 'User deleted successfully.');
     }
+    public function makeAdmin(User $user)
+{
+    if ($user->is_admin) {
+        return back()->with('status', 'User is already an admin.');
+    }
+
+    $user->is_admin = true;
+    $user->save();
+
+    return back()->with('status', 'User promoted to admin.');
+}
 }

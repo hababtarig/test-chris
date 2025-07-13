@@ -82,6 +82,19 @@
                                     </form>
                                 </td>
                                 <td class="px-4 py-2 text-center">
+    @if (!$user->is_admin && $user->id !== auth()->id())
+        <form method="POST" action="{{ route('users.makeAdmin', $user) }}">
+            @csrf
+            <button type="submit" class="text-yellow-500 hover:text-yellow-700">
+                🔑 Make Admin
+            </button>
+        </form>
+    @else
+        <span class="text-green-600 font-semibold">Admin</span>
+    @endif
+</td>
+
+                                <td class="px-4 py-2 text-center">
                                     <form method="POST" action="{{ route('users.destroy', $user) }}" class="inline">
                                         @csrf
                                         @method('DELETE')

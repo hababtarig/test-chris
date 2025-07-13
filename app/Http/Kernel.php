@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-\Log::info('✅ AdminMiddleware hit');
 
 class Kernel extends HttpKernel
 {
@@ -53,7 +52,7 @@ class Kernel extends HttpKernel
                 'verified' =>
                         \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
                 'isadmin' => \App\Http\Middleware\AdminMiddleware::class,
-                // 'approved' => \App\Http\Middleware\EnsureUserIsApproved::class,
+               
 
 
 
