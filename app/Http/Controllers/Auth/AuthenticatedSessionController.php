@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
 
     // Admin
     if ($user->is_admin) {
-        return redirect()->route('admin.landing');
+        return redirect()->route('admin.options');
     }
 
     // Non-admin
