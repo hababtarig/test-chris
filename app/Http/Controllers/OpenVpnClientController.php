@@ -1,40 +1,42 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Jobs\OpenVpnClientCreationJob;
 use Illuminate\Http\Request;
+use App\Models\VpnUser;
+
 
 class OpenVpnClientController extends Controller
 {
-    public function createClient(Request $request)
+    
+
+public function createVpnUser(Request $request)
 {
-    $validated = $request->validate([
-        'client_name' => 'required|string|alpha_dash',
+    $username = $request->input('username');
+
+    $vpnUser = VpnUser::create([
+        'name' => $username,
+        'status' => 'pending',
     ]);
 
-    $clientName = $validated['client_name'];
+    OpenVpnClientCreationJob::dispatch($username);
 
-    $serverIp = env('OPENVPN_IP');
-    $pemPath = escapeshellarg(env('EC2_KEY_PATH'));
-    $sshUser = escapeshellarg(env('EC2_USER', 'ec2-user'));
+    return response()->json(['message' => "🕒 Creating VPN client '$username' in background..."]);
+}
 
-    if (empty($serverIp)) {
-        return back()->with('error', 'OpenVPN server IP not configured.');
-    }
+    public function createClient(Request $request)
+    {
+        $validated = $request->validate([
+            'client_name' => 'required|string|alpha_dash',
+        ]);
 
-   $cleanName = preg_replace('/[^a-zA-Z0-9_\-]/', '', $clientName);
+        // Dispatch the job to background queue
+        OpenVpnClientCreationJob::dispatch($validated['client_name']);
+return back()
+    ->with('success', "🕒 Creating VPN client '{$validated['client_name']}' in background...")
+    ->with('vpn_username', $validated['client_name']);
 
-    // Simulate: echo "testuser" | ssh -tt ...
-   $sshCommand = "echo $cleanName | ssh -tt -i $pemPath -o StrictHostKeyChecking=no $sshUser@$serverIp /home/ec2-user/vpn-cred-create.sh";
 
-
-    exec($sshCommand . ' 2>&1', $output, $exitCode);
-
-    if ($exitCode === 0) {
-        return back()->with('success', "✅ User '$clientName' created successfully.\n" . implode("\n", $output));
-    } else {
-        return back()->with('error', "❌ Failed to create user (exit code $exitCode).\nOutput:\n" . implode("\n", $output));
     }
 }
 
-}

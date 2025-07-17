@@ -13,6 +13,17 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+  'servers' => [
+    'openvpn' => ['ip' => env('OPENVPN_IP')],
+    'ftp'     => ['ip' => env('FTP_SERVER_IP')],
+    'haproxy' => ['ip' => env('HAPROXY_SERVER_IP')],
+],
+
+
+    'ec2' => [
+        'key_path' => env('EC2_KEY_PATH'),
+        'user'     => env('EC2_USER', 'ec2-user'),
+    ],
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

@@ -6,6 +6,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Models\User;
 use App\Http\Controllers\ScriptRunnerController;
 use App\Http\Controllers\OpenVpnClientController;
+use App\Http\Controllers\DeleteUserController;
 
 
 // Redirect root to login
@@ -54,6 +55,10 @@ Route::middleware(['auth', 'verified'])->get('/verquin-app', function () {
     return view('verquin.dashboard', compact('users'));
 
 })->name('verquin');
+
+
+
+Route::post('/verquin/user-management/delete', [DeleteUserController::class, 'delete'])->name('user.delete');
 
 // Breeze auth scaffolding
 require __DIR__ . '/auth.php';
