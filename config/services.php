@@ -13,12 +13,24 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-  'servers' => [
-    'openvpn' => ['ip' => env('OPENVPN_IP')],
-    'ftp'     => ['ip' => env('FTP_SERVER_IP')],
-    'haproxy' => ['ip' => env('HAPROXY_SERVER_IP')],
+'servers' => [
+    'openvpn' => [
+        'ip'            => env('OPENVPN_IP'),           // Actual target (EC2)
+        'controller_ip' => env('CONTROLLER_IP'), // Ubuntu box running Ansible
+    ],
+    'ftp' => [
+        'ip'            => env('FTP_SERVER_IP'),
+        'controller_ip' => env('CONTROLLER_IP'),
+    ],
+    'haproxy' => [
+        'ip'            => env('HAPROXY_SERVER_IP'),
+        'controller_ip' => env('CONTROLLER_IP'),
+    ],
 ],
-
+    'ubuntu' => [
+        'key_path' => env('CONTROLLER_KEY_PATH'),
+        'user'     => env('UBUNTU_USER', 'ubuntu-user'),
+    ],
 
     'ec2' => [
         'key_path' => env('EC2_KEY_PATH'),

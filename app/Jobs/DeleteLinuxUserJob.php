@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
@@ -12,48 +13,60 @@ class DeleteLinuxUserJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $host;
-    protected string $privateKey;
-    protected string $sshUser;
+    protected string $server;
     protected string $username;
 
-    public function __construct(string $host, string $privateKey, string $sshUser, string $username)
+    public function __construct(string $server, string $username)
     {
-        $this->host = $host;
-        $this->privateKey = $privateKey;
-        $this->sshUser = $sshUser;
+        $this->server = $server;
         $this->username = $username;
     }
 
     public function handle(): void
     {
-        $remoteScript = 'delete_linux_user.sh';
+        $controllerIp = config("services.servers.{$this->server}.controller_ip");
+        $targetIp     = config("services.servers.{$this->server}.ip");
 
-        if (!$this->host || !$this->privateKey || !$this->sshUser || !$this->username) {
-            Log::error("Missing Linux user deletion job parameters", [
-                'host' => $this->host,
-                'privateKey' => $this->privateKey,
-                'sshUser' => $this->sshUser,
-                'username' => $this->username,
+        $pemPath = config('services.ubuntu.key_path');
+        $sshUser = escapeshellarg(config('services.ubuntu.user', 'ubuntu'));
+
+        if (!$controllerIp || !$targetIp) {
+            Log::error("❌ DeleteLinuxUserJob: Missing IP(s) for server: {$this->server}", [
+                'controller_ip' => $controllerIp,
+                'target_ip'     => $targetIp,
             ]);
             return;
         }
 
-        $cmd = sprintf(
-            'ssh -i %s -o StrictHostKeyChecking=no %s@%s "bash ~/%s %s"',
-            escapeshellarg($this->privateKey),
-            escapeshellarg($this->sshUser),
-            escapeshellarg($this->host),
-            escapeshellarg($remoteScript),
-            escapeshellarg($this->username)
+        // Construct Ansible command
+    $ansibleCmd = sprintf(
+    "ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/delete-linux-user.yml --extra-vars 'username=%s'",
+    $this->username
+);
+
+        // SSH into controller to run playbook
+        $sshCmd = sprintf(
+            'ssh -i %s -o StrictHostKeyChecking=no %s@%s "%s"',
+            $pemPath,
+            $sshUser,
+            $controllerIp,
+            $ansibleCmd
         );
 
-        exec($cmd . ' 2>&1', $output, $exitCode);
+        exec($sshCmd . ' 2>&1', $output, $exitCode);
 
-        Log::info("Linux user deletion job result", [
-            'command' => $cmd,
-            'exit' => $exitCode,
-            'output' => $output,
+        Log::info('✅ DeleteLinuxUserJob executed', [
+            'command'   => $sshCmd,
+            'exitCode'  => $exitCode,
+            'output'    => $output,
         ]);
+
+        if ($exitCode !== 0) {
+            Log::error('❌ Failed to delete Linux user', [
+                'username' => $this->username,
+                'exitCode' => $exitCode,
+                'output'   => $output,
+            ]);
+        }
     }
 }
