@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Models\Task;
 
 class LinuxUserCreationJob implements ShouldQueue
 {
@@ -46,6 +47,12 @@ class LinuxUserCreationJob implements ShouldQueue
         $escapedPassword  = escapeshellarg($this->password);
         $escapedPublicKey = escapeshellarg($this->publicKey);
 
+        $task = Task::create([
+        'type'    => 'create_linux_user',
+        'server'  => $this->server,
+        'username'=> $this->username,
+        'status'  => 'pending',
+    ]);
         // Construct the Ansible command to run on the Ubuntu Ansible host
         // REMOVE escapeshellcmd here — it's escaping incorrectly for Ansible
 $ansibleCmd = sprintf(
@@ -66,6 +73,10 @@ $ansibleCmd = sprintf(
         );
 
         exec($sshCmd . ' 2>&1', $output, $exitCode);
+
+         $task->log = json_encode($output);
+            $task->status = $exitCode === 0 ? 'success' : 'failed';
+            $task->save();
 
         Log::info('✅ LinuxUserCreationJob executed', [
             'command'   => $sshCmd,

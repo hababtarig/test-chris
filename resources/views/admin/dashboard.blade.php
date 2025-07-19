@@ -60,52 +60,66 @@
             <!-- Users Table -->
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-                    <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                        <tr>
-                            <th class="px-4 py-3">Name</th>
-                            <th class="px-4 py-3">Email</th>
-                            <th class="px-4 py-3 text-center">Approve</th>
-                            <th class="px-4 py-3 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($users as $user)
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <td class="px-4 py-2">{{ $user->name }}</td>
-                                <td class="px-4 py-2">{{ $user->email }}</td>
-                                <td class="px-4 py-2 text-center">
-                                    <form method="POST" action="{{ route('users.approve', $user) }}">
-                                        @csrf
-                                        <input type="checkbox"
-                                               onchange="this.form.submit()"
-                                               {{ $user->approved ? 'checked disabled' : '' }}>
-                                    </form>
-                                </td>
-                                <td class="px-4 py-2 text-center">
-    @if (!$user->is_admin && $user->id !== auth()->id())
-        <form method="POST" action="{{ route('users.makeAdmin', $user) }}">
-            @csrf
-            <button type="submit" class="text-yellow-500 hover:text-yellow-700">
-                🔑 Make Admin
-            </button>
-        </form>
-    @else
-        <span class="text-green-600 font-semibold">Admin</span>
-    @endif
-</td>
+<thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+    <tr>
+        <th class="px-4 py-3">Name</th>
+        <th class="px-4 py-3">Email</th>
+        <th class="px-4 py-3 text-center">Approve</th>
+        <th class="px-4 py-3 text-center">Role</th>
+        <th class="px-4 py-3 text-center">Actions</th> {{-- Only promote action --}}
+        <th class="px-4 py-3 text-center">Delete</th> {{-- Separate delete column --}}
+    </tr>
+</thead>
+<tbody>
+@foreach ($users as $user)
+    <tr class="border-b border-gray-200 dark:border-gray-700">
+        <td class="px-4 py-2">{{ $user->name }}</td>
+        <td class="px-4 py-2">{{ $user->email }}</td>
+        <td class="px-4 py-2 text-center">
+            <form method="POST" action="{{ route('users.approve', $user) }}">
+                @csrf
+                <input type="checkbox"
+                       onchange="this.form.submit()"
+                       {{ $user->approved ? 'checked disabled' : '' }}>
+            </form>
+        </td>
+        <td class="px-4 py-2 text-center">
+            @if ($user->is_admin)
+                <span class="text-green-600 font-semibold">Admin</span>
+            @else
+                <span class="text-gray-500">User</span>
+            @endif
+        </td>
+        <td class="px-4 py-2 text-center">
+            @if (!$user->is_admin && $user->id !== auth()->id())
+                <form method="POST" action="{{ route('users.makeAdmin', $user) }}">
+                    @csrf
+                    <button type="submit" class="text-yellow-500 hover:text-yellow-700">
+                        🔑 Make Admin
+                    </button>
+                </form>
+            @else
+                -- {{-- Show dash when user is already admin or is the logged-in user --}}
+            @endif
+        </td>
+        <td class="px-4 py-2 text-center">
+            @if ($user->id !== auth()->id())
+                <form method="POST" action="{{ route('users.destroy', $user) }}" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-500 hover:text-red-700">
+                        🗑️
+                    </button>
+                </form>
+            @else
+                --
+            @endif
+        </td>
+    </tr>
+@endforeach
+</tbody>
 
-                                <td class="px-4 py-2 text-center">
-                                    <form method="POST" action="{{ route('users.destroy', $user) }}" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
+
                 </table>
             </div>
         </div>

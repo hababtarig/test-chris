@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
 use App\Jobs\DeleteLinuxUserJob;
+use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DeleteUserController extends Controller
 {
@@ -31,9 +32,17 @@ class DeleteUserController extends Controller
             return back()->withErrors(['server' => 'Server configuration is missing or incomplete.']);
         }
 
-        // Dispatch job with server key only (not raw IPs)
-        DeleteLinuxUserJob::dispatch($serverKey, $username);
+        // Create task record
+        $task = Task::create([
+            'type'     => 'delete_linux_user',
+            'server'   => $serverKey,
+            'username' => $username,
+            'status'   => 'pending',
+        ]);
 
-        return back()->with('status', "✅ Deleting Linux user '{$username}' on '{$serverKey}' server...");
+        // Dispatch job with task ID
+        DeleteLinuxUserJob::dispatch($serverKey, $username, $task->id);
+
+        return back()->with('success', "🕒 Deleting Linux user '{$username}' on '{$serverKey}' server in background...");
     }
 }

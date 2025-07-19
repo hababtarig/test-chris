@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Task;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,15 +16,23 @@ class DeleteLinuxUserJob implements ShouldQueue
 
     protected string $server;
     protected string $username;
+    protected int $taskId;
 
-    public function __construct(string $server, string $username)
+    public function __construct(string $server, string $username, int $taskId)
     {
         $this->server = $server;
         $this->username = $username;
+        $this->taskId = $taskId;
     }
 
     public function handle(): void
     {
+        $task = Task::find($this->taskId);
+        if (!$task) {
+            Log::error("❌ DeleteLinuxUserJob: Task not found", ['task_id' => $this->taskId]);
+            return;
+        }
+
         $controllerIp = config("services.servers.{$this->server}.controller_ip");
         $targetIp     = config("services.servers.{$this->server}.ip");
 
@@ -31,41 +40,54 @@ class DeleteLinuxUserJob implements ShouldQueue
         $sshUser = escapeshellarg(config('services.ubuntu.user', 'ubuntu'));
 
         if (!$controllerIp || !$targetIp) {
-            Log::error("❌ DeleteLinuxUserJob: Missing IP(s) for server: {$this->server}", [
+            $task->status = 'failed';
+            $task->log = "Missing IP(s) for server: {$this->server}";
+            $task->save();
+
+            Log::error("❌ DeleteLinuxUserJob: Missing IP(s)", [
                 'controller_ip' => $controllerIp,
                 'target_ip'     => $targetIp,
             ]);
             return;
         }
 
-        // Construct Ansible command
-    $ansibleCmd = sprintf(
-    "ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/delete-linux-user.yml --extra-vars 'username=%s'",
-    $this->username
-);
+        // Build Ansible command
+        $ansibleCmd = sprintf(
+            "ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/delete-linux-user.yml --extra-vars 'username=%s'",
+            escapeshellarg($this->username)
+        );
 
-        // SSH into controller to run playbook
         $sshCmd = sprintf(
             'ssh -i %s -o StrictHostKeyChecking=no %s@%s "%s"',
-            $pemPath,
+            escapeshellarg($pemPath),
             $sshUser,
-            $controllerIp,
+            escapeshellarg($controllerIp),
             $ansibleCmd
         );
 
-        exec($sshCmd . ' 2>&1', $output, $exitCode);
+        $output = [];
+        $exitCode = 0;
 
-        Log::info('✅ DeleteLinuxUserJob executed', [
-            'command'   => $sshCmd,
-            'exitCode'  => $exitCode,
-            'output'    => $output,
-        ]);
+        try {
+           exec($sshCmd . ' 2>&1', $output, $exitCode);
 
-        if ($exitCode !== 0) {
-            Log::error('❌ Failed to delete Linux user', [
-                'username' => $this->username,
-                'exitCode' => $exitCode,
-                'output'   => $output,
+$task->status = ($exitCode === 0) ? 'success' : 'failed';
+$task->log = implode("\n", $output);
+$task->save();
+
+
+            Log::info('✅ DeleteLinuxUserJob executed', [
+                'command'   => $sshCmd,
+                'exitCode'  => $exitCode,
+                'output'    => $output,
+            ]);
+        } catch (\Throwable $e) {
+            $task->status = 'failed';
+            $task->log = $e->getMessage();
+            $task->save();
+
+            Log::error('❌ DeleteLinuxUserJob failed with exception', [
+                'message' => $e->getMessage(),
             ]);
         }
     }

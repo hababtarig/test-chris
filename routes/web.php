@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Http\Controllers\ScriptRunnerController;
 use App\Http\Controllers\OpenVpnClientController;
 use App\Http\Controllers\DeleteUserController;
+use \App\Http\Controllers\TaskStatusController;
 
 
 // Redirect root to login
@@ -59,6 +60,14 @@ Route::middleware(['auth', 'verified'])->get('/verquin-app', function () {
 
 
 Route::post('/verquin/user-management/delete', [DeleteUserController::class, 'delete'])->name('user.delete');
+
+Route::get('/verquin/user-management/deletion-log-snippet', [TaskStatusController::class, 'latestDeleteLog'])->name('task.latest-delete-log');
+Route::get('/verquin/user-management/latest-create-log', [TaskStatusController::class, 'latestCreateLog'])->name('task.latest-create-log');
+Route::get('/verquin/user-management/openvpn-create', [TaskStatusController::class, 'latestOpenVpnCreateLog'])->name('task.latest-openvpn-create-log');
+
+
+
+
 
 // Breeze auth scaffolding
 require __DIR__ . '/auth.php';
