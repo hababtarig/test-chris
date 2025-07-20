@@ -45,7 +45,7 @@
             </div>
         </form>
         <div id="create-user-log" style="display: none;" 
-     class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm text-green-700 font-mono whitespace-pre-wrap mt-2"></div>
+     class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm font-mono whitespace-pre-wrap mt-2 text-gray-700"></div>
     </div>
 
     {{-- Create OpenVPN Client User --}}
@@ -77,9 +77,39 @@
             </div>
         </form>
         <div id="openvpn-create-log" style="display: none;"
-         class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm text-green-700 font-mono whitespace-pre-wrap mt-2"></div>
+         class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm font-mono whitespace-pre-wrap mt-2 text-gray-700"></div>
 </div>
     </div>
+
+    {{-- Delete OpenVPN Client User --}}
+<div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-4 text-gray-700 dark:text-gray-300">
+    <h3 class="text-lg font-semibold mb-2">Delete OpenVPN Client User</h3>
+    <form id="openvpn-delete-form" action="{{ route('openvpn.client.delete') }}" method="POST" class="space-y-4">
+
+        @csrf
+        <div>
+            <label for="client_name" class="block text-sm font-medium mb-1">VPN Client Username</label>
+            <input
+                id="client_name"
+                name="client_name"
+                type="text"
+                class="border border-gray-300 rounded-md px-3 py-2 w-80 dark:bg-gray-700 dark:text-white"
+                placeholder="Enter VPN client username to delete"
+                required
+            >
+        </div>
+        <div>
+            <button
+                type="submit"
+                class="bg-red-600 text-white text-sm px-4 py-2 rounded-md hover:bg-red-700 transition"
+            >Delete Client</button>
+        </div>
+    </form>
+    <div id="openvpn-delete-log" style="display: none;"
+     class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm font-mono whitespace-pre-wrap mt-2 text-gray-700"></div>
+
+</div>
+
 
     {{-- Delete Linux User --}}
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-4 text-gray-700 dark:text-gray-300">
@@ -109,161 +139,102 @@
             </div>
         </form>
         <div id="delete-error-log" style="display: none;" 
-             class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm text-red-700 font-mono whitespace-pre-wrap mt-2"></div>
+             class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-sm font-mono whitespace-pre-wrap mt-2 text-gray-700"></div>
     </div>
 
 </div>
 
 <script>
-//delete linux user status 
-let deleteLogInterval = null;
+function setLogText(logDiv, text) {
+    logDiv.textContent = text;
 
-async function fetchDeleteErrorLog() {
-    try {
-        const response = await fetch('{{ route('task.latest-delete-log') }}');
-        const text = await response.text();
-        document.getElementById('delete-error-log').textContent = text || 'Pending...';
-    } catch (err) {
-        console.error('Failed to fetch deletion log:', err);
-        document.getElementById('delete-error-log').textContent = '⚠️ Error loading deletion log.';
+    // Reset classes
+    logDiv.classList.remove('text-green-700', 'text-red-700');
+    logDiv.classList.add('text-gray-700');
+
+    const lower = text.toLowerCase();
+    if (lower.includes('success') || lower.includes('created') || lower.includes('done')) {
+        logDiv.classList.remove('text-gray-700');
+        logDiv.classList.add('text-green-700');
+    } else if (lower.includes('error') || lower.includes('failed') || lower.includes('fail') || lower.includes('not')) {
+        logDiv.classList.remove('text-gray-700');
+        logDiv.classList.add('text-red-700');
     }
 }
 
-document.getElementById('delete-linux-user-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
+let logIntervals = {
+    create: null,
+    delete: null,
+    ovpnCreate: null,
+    ovpnDelete: null
+};
 
-    const form = e.target;
-    const formData = new FormData(form);
-
-    document.getElementById('delete-error-log').style.display = 'block';
-    document.getElementById('delete-error-log').textContent = 'Pending...';
-
-    if (deleteLogInterval) clearInterval(deleteLogInterval);
-    fetchDeleteErrorLog(); // initial fetch
-    deleteLogInterval = setInterval(fetchDeleteErrorLog, 5000);
-
+async function fetchLog(route, logId, type) {
     try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        if (response.ok) {
-            console.log('Delete request sent successfully');
-            // optionally, show a success message or keep polling
-        } else {
-            console.error('Delete request failed:', response.status);
-            document.getElementById('delete-error-log').textContent = '⚠️ Delete request failed.';
-        }
+        const res = await fetch(route);
+        const text = await res.text();
+        const logDiv = document.getElementById(logId);
+        setLogText(logDiv, text || 'Pending...');
     } catch (err) {
-        console.error('Request error:', err);
-        document.getElementById('delete-error-log').textContent = '⚠️ Request failed.';
-    }
-});
-
-//create linux user status
-let createLogInterval = null;
-
-async function fetchCreateUserLog() {
-    try {
-        const response = await fetch('{{ route('task.latest-create-log') }}');
-        const text = await response.text();
-        document.getElementById('create-user-log').textContent = text || 'Pending...';
-    } catch (err) {
-        console.error('Failed to fetch create log:', err);
-        document.getElementById('create-user-log').textContent = '⚠️ Error loading create log.';
+        console.error(`Failed to fetch ${type} log:`, err);
+        setLogText(document.getElementById(logId), `⚠️ Error loading ${type} log.`);
     }
 }
 
-document.getElementById('linux-prompt-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
+function setupFormListener(formId, route, logId, intervalKey, type) {
+    const form = document.getElementById(formId);
+    const logDiv = document.getElementById(logId);
 
-    const form = e.target;
-    const formData = new FormData(form);
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-    document.getElementById('create-user-log').style.display = 'block';
-    document.getElementById('create-user-log').textContent = 'Pending...';
+        const formData = new FormData(form);
 
-    if (createLogInterval) clearInterval(createLogInterval);
-    fetchCreateUserLog(); // initial fetch
-    createLogInterval = setInterval(fetchCreateUserLog, 5000);
+        // Clear and show empty log
+        logDiv.style.display = 'block';
+        setLogText(logDiv, 'Pending...');
 
-    try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        if (response.ok) {
-            console.log('Create request sent successfully');
-        } else {
-            console.error('Create request failed:', response.status);
-            document.getElementById('create-user-log').textContent = '⚠️ Create request failed.';
+        // Clear previous polling
+        if (logIntervals[intervalKey]) {
+            clearInterval(logIntervals[intervalKey]);
         }
-    } catch (err) {
-        console.error('Request error:', err);
-        document.getElementById('create-user-log').textContent = '⚠️ Request failed.';
-    }
-});
 
-//ovpn creds creation
-let openVpnLogInterval = null;
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
 
-async function fetchOpenVpnCreateLog() {
-    try {
-        const response = await fetch('{{ route('task.latest-openvpn-create-log') }}');
-        const text = await response.text();
-        document.getElementById('openvpn-create-log').textContent = text || 'Pending...';
-    } catch (err) {
-        console.error('Failed to fetch OpenVPN create log:', err);
-        document.getElementById('openvpn-create-log').textContent = '⚠️ Error loading OpenVPN create log.';
-    }
+            if (!response.ok) {
+                setLogText(logDiv, `⚠️ ${type} request failed.`);
+                return;
+            }
+
+            // Start polling AFTER request goes through (1.5s delay to avoid old log)
+            setTimeout(() => {
+                fetchLog(route, logId, type);
+                logIntervals[intervalKey] = setInterval(() => {
+                    fetchLog(route, logId, type);
+                }, 5000);
+            }, 1500);
+
+        } catch (err) {
+            setLogText(logDiv, `⚠️ ${type} request error.`);
+            console.error(`${type} request error:`, err);
+        }
+    });
 }
 
-document.getElementById('openvpn-client-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const logDiv = document.getElementById('openvpn-create-log');
-    logDiv.style.display = 'block';
-    logDiv.textContent = 'Pending...';
-
-    if (openVpnLogInterval) clearInterval(openVpnLogInterval);
-    fetchOpenVpnCreateLog(); // initial fetch
-    openVpnLogInterval = setInterval(fetchOpenVpnCreateLog, 5000);
-
-    try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-
-        if (response.ok) {
-            console.log('OpenVPN client create request sent successfully');
-        } else {
-            console.error('OpenVPN client create request failed:', response.status);
-            logDiv.textContent = '⚠️ OpenVPN create request failed.';
-        }
-    } catch (err) {
-        console.error('OpenVPN client create request error:', err);
-        logDiv.textContent = '⚠️ Request failed.';
-    }
-});
-
+// Assign listeners
+setupFormListener('linux-prompt-form', '{{ route('task.latest-create-log') }}', 'create-user-log', 'create', 'Create');
+setupFormListener('delete-linux-user-form', '{{ route('task.latest-delete-log') }}', 'delete-error-log', 'delete', 'Delete');
+setupFormListener('openvpn-client-form', '{{ route('task.latest-openvpn-create-log') }}', 'openvpn-create-log', 'ovpnCreate', 'OpenVPN Create');
+setupFormListener('openvpn-delete-form', '{{ route('task.latest-openvpn-delete-log') }}', 'openvpn-delete-log', 'ovpnDelete', 'OpenVPN Delete');
 </script>
+
 
 @endsection

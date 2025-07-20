@@ -8,6 +8,7 @@ use App\Http\Controllers\ScriptRunnerController;
 use App\Http\Controllers\OpenVpnClientController;
 use App\Http\Controllers\DeleteUserController;
 use \App\Http\Controllers\TaskStatusController;
+use App\Http\Controllers\OpenVpnClientList;
 
 
 // Redirect root to login
@@ -40,6 +41,8 @@ Route::middleware('auth')->group(function () {
 });
 
 // Verquin UI (custom layout, not Breeze)
+
+Route::middleware(['auth', 'verified'])->get('/verquin-app', [OpenVpnClientList::class, 'listOpenVpnUsers'])->name('verquin');
 Route::prefix('verquin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/user-management', fn () => view('verquin.user-management'))->name('verquin.user');
     Route::get('/device-management', fn () => view('verquin.device-management'))->name('verquin.device');
@@ -50,12 +53,15 @@ Route::post('/verquin/user-management/create', [ScriptRunnerController::class, '
  Route::post('/user-management/create-openvpn-client', [OpenVpnClientController::class, 'createClient'])
         ->name('openvpn.client.create');
 
-// Fallback view to general Verquin app (e.g., landing, dashboard shell)
-Route::middleware(['auth', 'verified'])->get('/verquin-app', function () {
-    $users = User::all(); // Or filter by roles if needed
-    return view('verquin.dashboard', compact('users'));
+/*Route::middleware(['auth', 'verified'])->get('/verquin-app', function () {
+    $users = User::all(); 
+   return view('verquin.dashboard', [
+    'users' => $users,
+    'vpnClients' => [],
+]); 
 
-})->name('verquin');
+
+})->name('verquin'); */
 
 
 
@@ -64,6 +70,9 @@ Route::post('/verquin/user-management/delete', [DeleteUserController::class, 'de
 Route::get('/verquin/user-management/deletion-log-snippet', [TaskStatusController::class, 'latestDeleteLog'])->name('task.latest-delete-log');
 Route::get('/verquin/user-management/latest-create-log', [TaskStatusController::class, 'latestCreateLog'])->name('task.latest-create-log');
 Route::get('/verquin/user-management/openvpn-create', [TaskStatusController::class, 'latestOpenVpnCreateLog'])->name('task.latest-openvpn-create-log');
+Route::get('/verquin/user-management/openvpn-delete', [TaskStatusController::class, 'latestOpenVpnDeleteLog'])->name('task.latest-openvpn-delete-log');
+
+Route::post('/verquin/user-management/openvpn-delete', [OpenVpnClientController::class, 'deleteClient'])->name('openvpn.client.delete');
 
 
 

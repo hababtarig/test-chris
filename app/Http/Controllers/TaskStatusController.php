@@ -6,179 +6,90 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskStatusController extends Controller
-{public function latestDeleteLog()
 {
-    $task = Task::where('type', 'delete_linux_user')
-        ->orderByDesc('created_at')
-        ->first();
-
-    if (!$task) {
-        return response('No task found.');
+    public function latestDeleteLog()
+    {
+        return $this->respondWithTaskLog('delete_linux_user');
     }
 
-    if (!$task->log) {
-        // No log yet → probably still pending
-        return response("Status: {$task->status}");
+    public function latestCreateLog()
+    {
+        return $this->respondWithTaskLog('create_linux_user');
     }
 
-    $lines = [];
-
-    // Try to decode the log JSON
-    $decoded = json_decode($task->log, true);
-
-    if (is_array($decoded)) {
-        // look for nested stdout_lines or stdout
-        foreach ($decoded as $key => $value) {
-            if (is_array($value) && isset($value['stdout_lines'])) {
-                $lines = $value['stdout_lines'];
-                break;
-            }
-        }
-
-        if (empty($lines)) {
-            foreach ($decoded as $key => $value) {
-                if (is_array($value) && isset($value['stdout'])) {
-                    $lines = explode("\n", $value['stdout']);
-                    break;
-                }
-            }
-        }
+    public function latestOpenVpnCreateLog()
+    {
+        return $this->respondWithTaskLog('create_openvpn_user');
     }
 
-    // fallback: maybe log is plain text
-    if (empty($lines)) {
-        $lines = explode("\n", $task->log);
+    public function latestOpenVpnDeleteLog()
+    {
+        return $this->respondWithTaskLog('delete_openvpn_user');
     }
 
-    // Filter only lines with ✅ or ❌
-    $filtered = array_filter($lines, function($line) {
-        return str_contains($line, '❌') || str_contains($line, '✅');
-    });
+    private function respondWithTaskLog(string $type)
+    {
+       $task = Task::where('type', $type)->orderByDesc('created_at')->first();
 
-    $output = "Status: {$task->status}";
-    if ($filtered) {
-        $output .= "\n" . implode("\n", $filtered);
-    }
-
-    return response($output);
-}
-public function latestCreateLog()
-{
-    $task = Task::where('type', 'create_linux_user')
-        ->orderByDesc('created_at')
-        ->first();
-
-    if (!$task) {
-        return response('No task found.');
-    }
-
-    if (!$task->log) {
-        return response("Status: {$task->status}");
-    }
-
-    $lines = [];
-
-    // Try to decode JSON
-    $decoded = json_decode($task->log, true);
-
-    if (is_array($decoded)) {
-        // check for stdout_lines
-        foreach ($decoded as $key => $value) {
-            if (is_array($value) && isset($value['stdout_lines'])) {
-                $lines = $value['stdout_lines'];
-                break;
-            }
-        }
-
-        // fallback to stdout
-        if (empty($lines)) {
-            foreach ($decoded as $key => $value) {
-                if (is_array($value) && isset($value['stdout'])) {
-                    $lines = explode("\n", $value['stdout']);
-                    break;
-                }
-            }
-        }
-
-        // fallback to top-level strings
-        if (empty($lines)) {
-            foreach ($decoded as $line) {
-                if (is_string($line)) {
-                    $lines[] = $line;
-                }
-            }
-        }
-    }
-
-    // fallback: treat raw log as plain text
-    if (empty($lines)) {
-        $lines = explode("\n", $task->log);
-    }
-
-    // optional filter ✅ or ❌ only:
-    $filtered = array_filter($lines, fn($line) => str_contains($line, '✅') || str_contains($line, '❌'));
-
-    $output = "Status: {$task->status}";
-    $output .= "\n" . implode("\n", $filtered ?: $lines); // fallback to all if filtered is empty
-
-    return response($output);
-}
-public function latestOpenVpnCreateLog()
-{
-    $task = Task::where('type', 'create_openvpn_user')  // or whatever type you store for OpenVPN user creation
-        ->orderByDesc('created_at')
-        ->first();
-
-    if (!$task) {
-        return response('No task found.');
-    }
-
-    if (!$task->log) {
-        return response("Status: {$task->status}");
-    }
-
-    $lines = [];
-
-    $decoded = json_decode($task->log, true);
-
-    if (is_array($decoded)) {
-        foreach ($decoded as $key => $value) {
-            if (is_array($value) && isset($value['stdout_lines'])) {
-                $lines = $value['stdout_lines'];
-                break;
-            }
-        }
-
-        if (empty($lines)) {
-            foreach ($decoded as $key => $value) {
-                if (is_array($value) && isset($value['stdout'])) {
-                    $lines = explode("\n", $value['stdout']);
-                    break;
-                }
-            }
-        }
-
-        if (empty($lines)) {
-            foreach ($decoded as $line) {
-                if (is_string($line)) {
-                    $lines[] = $line;
-                }
-            }
-        }
-    }
-
-    if (empty($lines)) {
-        $lines = explode("\n", $task->log);
-    }
-
-    // Filter lines containing ✅ or ❌ only:
-    $filtered = array_filter($lines, fn($line) => str_contains($line, '✅') || str_contains($line, '❌'));
-
-    $output = "Status: {$task->status}";
-    $output .= "\n" . implode("\n", $filtered ?: $lines);
-
-    return response($output);
+if (!$task || $task->status === 'pending') {
+    return response("Status: Pending");
 }
 
 
+        return response($this->parseTaskLog($task->log, $task->status));
+    }
+
+    private function parseTaskLog(?string $log, string $status): string
+    {
+        $lines = [];
+
+        if ($log) {
+            $decoded = json_decode($log, true);
+
+            if (is_array($decoded)) {
+                foreach ($decoded as $value) {
+                    if (is_array($value)) {
+                        if (isset($value['stdout_lines']) && is_array($value['stdout_lines'])) {
+                            $lines = $value['stdout_lines'];
+                            break;
+                        } elseif (isset($value['stdout']) && is_string($value['stdout'])) {
+                            $lines = explode("\n", $value['stdout']);
+                            break;
+                        }
+                    }
+                }
+
+                if (empty($lines)) {
+                    foreach ($decoded as $line) {
+                        if (is_string($line)) {
+                            $lines[] = $line;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($lines) && $log) {
+            $lines = explode("\n", $log);
+        }
+
+        // Filter only echo messages or lines with ✅ / ❌
+        $filtered = collect($lines)->filter(function ($line) {
+    return str_contains($line, '✅') ||
+           str_contains($line, '❌') ||
+           stripos($line, 'success') !== false ||
+           stripos($line, 'failed') !== false ||
+           str_starts_with(trim($line), 'echo ');
+})->all();
+
+
+        $statusLine = match ($status) {
+            'success' => 'Status: ✅ Success',
+            'failed'  => 'Status: ❌ Failed',
+            'pending' => 'Status: Pending',
+            default   => "Status: {$status}"
+        };
+
+        return $statusLine . "\n" . implode("\n", $filtered ?: []);
+    }
 }

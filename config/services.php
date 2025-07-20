@@ -17,6 +17,7 @@ return [
     'openvpn' => [
         'ip'            => env('OPENVPN_IP'),           // Actual target (EC2)
         'controller_ip' => env('CONTROLLER_IP'), // Ubuntu box running Ansible
+        'public_ip' => env('OPENVPN_IP_PUBLIC'),
     ],
     'ftp' => [
         'ip'            => env('FTP_SERVER_IP'),
