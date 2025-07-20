@@ -145,6 +145,14 @@
 </div>
 
 <script>
+    document.querySelectorAll('#delete-linux-user-form, #openvpn-delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+                e.preventDefault();
+            }
+        });
+    });
+
 function setLogText(logDiv, text) {
     logDiv.textContent = text;
 
