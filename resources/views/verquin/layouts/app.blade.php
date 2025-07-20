@@ -11,7 +11,9 @@
   <div class="flex min-h-screen">
 
     {{-- Sidebar --}}
-    <aside class="w-72 m-4 bg-white shadow-xl rounded-2xl flex flex-col overflow-y-auto">
+    <aside class="fixed top-0 left-0 h-screen w-72 bg-white shadow-xl rounded-r-2xl flex flex-col overflow-y-auto">
+
+
       <div class="px-6 py-4 text-2xl font-bold text-gray-800 border-b border-gray-300">
         Verquin Application
       </div>
@@ -46,10 +48,12 @@
     </aside>
 
     {{-- Main Content --}}
-    <main class="flex-1 overflow-y-auto p-8 bg-gray-100">
+    <main class="flex-1 overflow-y-auto p-8 bg-gray-100 ml-72">
       @yield('content')
     </main>
 
   </div>
+  @stack('scripts')
+
 </body>
 </html>
