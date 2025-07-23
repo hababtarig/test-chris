@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class OpenVpnClientList extends Controller
 {
   
-public function listOpenVpnUsers()
+ public function listOpenVpnUsers()
 {
     $vpnClients = Cache::remember('vpn_clients', now()->addMinutes(1), function () {
         $command = sprintf(
@@ -22,7 +22,7 @@ public function listOpenVpnUsers()
 
     return view('verquin.dashboard', [
        'vpnClients' => $vpnClients,
-    ]);
-}
+    ]); 
+} 
 
-}
+} 

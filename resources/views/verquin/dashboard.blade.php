@@ -6,12 +6,10 @@
     {{-- Welcome Section --}}
     <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-12 text-gray-800 dark:text-gray-100 text-center">
         <h1 class="text-5xl sm:text-6xl font-extrabold mb-4 tracking-tight">Welcome</h1>
-        <p class="text-xl sm:text-2xl font-light text-gray-600 dark:text-gray-300">
-            Navigate to your desired tab
-        </p>
     </div>
 
     {{-- OpenVPN Clients Table --}}
+    {{--
     <div class="mt-12 bg-white dark:bg-gray-900 shadow rounded-2xl p-6 overflow-x-auto">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 space-y-4 md:space-y-0">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
@@ -20,16 +18,15 @@
 
             <div>
                 <input
-    type="text"
-    id="search"
-    name="search"
-    placeholder="Search clients..."
-    autocomplete="off"
-    autocorrect="off"
-    spellcheck="false"
-    class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-/>
-
+                    type="text"
+                    id="search"
+                    name="search"
+                    placeholder="Search clients..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                />
             </div>
         </div>
 
@@ -54,11 +51,13 @@
             <p class="text-gray-500 dark:text-gray-400">No OpenVPN clients found.</p>
         @endif
     </div>
+    --}}
 
 </div>
 @endsection
 
 @push('scripts')
+{{--
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('search');
@@ -74,4 +73,5 @@
         });
     });
 </script>
+--}}
 @endpush

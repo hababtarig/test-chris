@@ -53,14 +53,15 @@ class LinuxUserCreationJob implements ShouldQueue
         'username'=> $this->username,
         'status'  => 'pending',
     ]);
-        // Construct the Ansible command to run on the Ubuntu Ansible host
-        // REMOVE escapeshellcmd here — it's escaping incorrectly for Ansible
+$ansibleHostGroup = "{$this->server}_servers";
 $ansibleCmd = sprintf(
-    'ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/create-linux-user.yml --extra-vars \'username=%s password=%s pubkey=%s\'', 
-    $this->username,
-    $this->password,
-    $this->publicKey
+    'ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/create-linux-user.yml --limit %s --extra-vars \'username=%s password=%s pubkey=%s\'', 
+    escapeshellarg($ansibleHostGroup),  // Use server name like 'ftp' or 'haproxy'
+    $escapedUsername,
+    $escapedPassword,
+    $escapedPublicKey
 );
+
 
 
         // Full SSH command to run on the Ubuntu controller

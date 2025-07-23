@@ -123,7 +123,7 @@
 
     document.querySelectorAll('#form-delete-linux-user, #form-delete-openvpn').forEach(form => {
         form.addEventListener('submit', e => {
-            if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            if (!confirm("Are you sure you want to delete this user?")) {
                 e.preventDefault();
             }
         });

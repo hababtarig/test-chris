@@ -52,10 +52,14 @@ class DeleteLinuxUserJob implements ShouldQueue
         }
 
         // Build Ansible command
-        $ansibleCmd = sprintf(
-            "ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/delete-linux-user.yml --extra-vars 'username=%s'",
-            escapeshellarg($this->username)
-        );
+        $escapedUsername = escapeshellarg($this->username);
+    $ansibleHostGroup = "{$this->server}_servers";
+
+    $ansibleCmd = sprintf(
+        'ansible-playbook -i /etc/ansible/hosts /home/ubuntu/ansible-playbooks/delete-linux-user.yml --limit %s --extra-vars \'username=%s\'',
+        escapeshellarg($ansibleHostGroup),
+        $escapedUsername
+    );
 
         $sshCmd = sprintf(
             'ssh -i %s -o StrictHostKeyChecking=no %s@%s "%s"',
