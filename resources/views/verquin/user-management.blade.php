@@ -111,6 +111,44 @@
                     <div id="log-delete-openvpn" class="log-box hidden mt-4"></div>
                 </div>
             </div>
+            {{-- Create VPN Config File --}}
+<div>
+    <h3 class="text-lg font-semibold mb-4">Create VPN Config File</h3>
+    <form id="form-create-vpn-file" action="{{ route('vpn.file.create') }}" method="POST" autocomplete="off" class="space-y-4">
+    @csrf
+    <input type="hidden" name="server" value="openvpn">
+    <div>
+        <label for="vpn-file-create" class="form-label">VPN Config Filename</label>
+        <input type="text" id="vpn-file-create" name="client_name" required class="form-input w-80" placeholder="Enter client name">
+        @error('client_name')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+    <div class="pt-2">
+        <button type="submit" class="form-button-blue">Create File</button>
+    </div>
+</form>
+    <div id="log-create-vpn-file" class="log-box hidden mt-4"></div>
+</div>
+
+{{-- Delete VPN Config File --}}
+<div>
+    <h3 class="text-lg font-semibold mb-4">Delete VPN Config File</h3>
+    <form id="form-delete-vpn-file" action="{{ route('vpn.file.delete') }}" method="POST" autocomplete="off" class="space-y-4">
+    @csrf
+    <input type="hidden" name="server" value="openvpn">
+    <div>
+        <label for="vpn-file-delete" class="form-label">VPN Config Filename</label>
+        <input type="text" id="vpn-file-delete" name="client_name" required class="form-input w-80" placeholder="Enter client name to delete">
+    </div>
+    <div class="pt-2">
+        <button type="submit" class="form-button-red">Delete File</button>
+    </div>
+</form>
+
+    <div id="log-delete-vpn-file" class="log-box hidden mt-4"></div>
+</div>
+
         </div>
     </div>
 
@@ -197,5 +235,8 @@
     setupFormListener('form-delete-linux-user', 'log-delete-linux-user', '{{ route('task.latest-delete-log') }}', 'delete_linux', 'Delete Linux');
     setupFormListener('form-create-openvpn', 'log-create-openvpn', '{{ route('task.latest-openvpn-create-log') }}', 'create_ovpn', 'Create OVPN');
     setupFormListener('form-delete-openvpn', 'log-delete-openvpn', '{{ route('task.latest-openvpn-delete-log') }}', 'delete_ovpn', 'Delete OVPN');
+    setupFormListener('form-create-vpn-file', 'log-create-vpn-file', '{{ route('task.latest-vpn-file-create-log') }}', 'create_vpn_file', 'Create VPN File');
+setupFormListener('form-delete-vpn-file', 'log-delete-vpn-file', '{{ route('task.latest-vpn-file-delete-log') }}', 'delete_vpn_file', 'Delete VPN File');
+
 </script>
 @endsection

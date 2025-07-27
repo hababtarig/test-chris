@@ -9,6 +9,8 @@ use App\Http\Controllers\OpenVpnClientController;
 use App\Http\Controllers\DeleteUserController;
 use \App\Http\Controllers\TaskStatusController;
 use App\Http\Controllers\OpenVpnClientList;
+use App\Http\Controllers\VpnFileController;
+
 
 
 // Redirect root to login
@@ -74,6 +76,15 @@ Route::get('/verquin/user-management/openvpn-delete', [TaskStatusController::cla
 
 Route::post('/verquin/user-management/openvpn-delete', [OpenVpnClientController::class, 'deleteClient'])->name('openvpn.client.delete');
 
+
+Route::post('/verquin/user-management/vpn-files/create', [VpnFileController::class, 'create'])
+    ->name('vpn.file.create');
+
+Route::post('/verquin/user-management/vpn-files/delete', [VpnFileController::class, 'delete'])
+    ->name('vpn.file.delete');
+
+Route::get('/verquin/user-management/vpn-files/create-log', [TaskStatusController::class, 'latestVpnFileCreateLog'])->name('task.latest-vpn-file-create-log');
+Route::get('/verquin/user-management/vpn-files/delete-log', [TaskStatusController::class, 'latestVpnFileDeleteLog'])->name('task.latest-vpn-file-delete-log');
 
 
 
