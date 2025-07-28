@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class TaskStatusController extends Controller
 {
+    public function latestCreateVpnDeviceLog()
+{
+    return $this->respondWithTaskLog('create_openvpn_device_creds');
+}
+
+public function latestDeleteVpnDeviceLog()
+{
+    return $this->respondWithTaskLog('delete_openvpn_device_creds');
+}
+
     public function latestVpnFileCreateLog()
 {
     return $this->respondWithTaskLog('create_openvpn_file');

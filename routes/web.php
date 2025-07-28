@@ -10,7 +10,7 @@ use App\Http\Controllers\DeleteUserController;
 use \App\Http\Controllers\TaskStatusController;
 use App\Http\Controllers\OpenVpnClientList;
 use App\Http\Controllers\VpnFileController;
-
+use App\Http\Controllers\VpnDeviceController;
 
 
 // Redirect root to login
@@ -87,6 +87,20 @@ Route::get('/verquin/user-management/vpn-files/create-log', [TaskStatusControlle
 Route::get('/verquin/user-management/vpn-files/delete-log', [TaskStatusController::class, 'latestVpnFileDeleteLog'])->name('task.latest-vpn-file-delete-log');
 
 
+Route::post('/verquin/device-management/vpn-device/create', [VpnDeviceController::class, 'create'])
+    ->name('vpn.device.create');
+
+// Delete VPN device credentials
+Route::post('/verquin/device-management/vpn-device/delete', [VpnDeviceController::class, 'delete'])
+    ->name('vpn.device.delete');
+
+// Fetch latest create log for frontend polling
+Route::get('/verquin/device-management/vpn-device/create-log', [TaskStatusController::class, 'latestCreateVpnDeviceLog'])
+    ->name('task.latest-vpn-device-create-log');
+
+// Fetch latest delete log for frontend polling
+Route::get('/verquin/device-management/vpn-device/delete-log', [TaskStatusController::class, 'latestDeleteVpnDeviceLog'])
+    ->name('task.latest-vpn-device-delete-log');
 
 
 // Breeze auth scaffolding
