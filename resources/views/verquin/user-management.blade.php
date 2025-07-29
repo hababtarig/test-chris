@@ -111,69 +111,81 @@
                     <div id="log-delete-openvpn" class="log-box hidden mt-4"></div>
                 </div>
             </div>
-            {{-- Create VPN Config File --}}
-<div>
-    <h3 class="text-lg font-semibold mb-4">Create VPN Config File</h3>
-    <form id="form-create-vpn-file" action="{{ route('vpn.file.create') }}" method="POST" autocomplete="off" class="space-y-4">
-    @csrf
-    <input type="hidden" name="server" value="openvpn">
+            {{-- OVPN File Management --}}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+    {{-- Create VPN Config File --}}
     <div>
-        <label for="vpn-file-create" class="form-label">VPN Config Filename</label>
-        <input type="text" id="vpn-file-create" name="client_name" required class="form-input w-80" placeholder="Enter client name">
-        @error('client_name')
-            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-        @enderror
+        <h3 class="text-lg font-semibold mb-4">Create .OVPN File</h3>
+        <form id="form-create-vpn-file" action="{{ route('vpn.file.create') }}" method="POST" autocomplete="off" class="space-y-4">
+            @csrf
+            <input type="hidden" name="server" value="openvpn">
+            <div>
+                <label for="vpn-file-create" class="form-label">.OVPN Filename</label>
+                <input type="text" id="vpn-file-create" name="client_name" required class="form-input w-80" placeholder="Enter client name">
+                @error('client_name')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="form-button-blue">Create File</button>
+            </div>
+        </form>
+        <div id="log-create-vpn-file" class="log-box hidden mt-4"></div>
     </div>
-    <div class="pt-2">
-        <button type="submit" class="form-button-blue">Create File</button>
-    </div>
-</form>
-    <div id="log-create-vpn-file" class="log-box hidden mt-4"></div>
-</div>
 
-{{-- Delete VPN Config File --}}
-<div>
-    <h3 class="text-lg font-semibold mb-4">Delete VPN Config File</h3>
-    <form id="form-delete-vpn-file" action="{{ route('vpn.file.delete') }}" method="POST" autocomplete="off" class="space-y-4">
-    @csrf
-    <input type="hidden" name="server" value="openvpn">
+    {{-- Delete VPN Config File --}}
     <div>
-        <label for="vpn-file-delete" class="form-label">VPN Config Filename</label>
-        <input type="text" id="vpn-file-delete" name="client_name" required class="form-input w-80" placeholder="Enter client name to delete">
+        <h3 class="text-lg font-semibold mb-4">Delete .OVPN File</h3>
+        <form id="form-delete-vpn-file" action="{{ route('vpn.file.delete') }}" method="POST" autocomplete="off" class="space-y-4">
+            @csrf
+            <input type="hidden" name="server" value="openvpn">
+            <div>
+                <label for="vpn-file-delete" class="form-label">.OVPN Filename</label>
+                <input type="text" id="vpn-file-delete" name="client_name" required class="form-input w-80" placeholder="Enter client name to delete">
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="form-button-red">Delete File</button>
+            </div>
+        </form>
+        <div id="log-delete-vpn-file" class="log-box hidden mt-4"></div>
     </div>
-    <div class="pt-2">
-        <button type="submit" class="form-button-red">Delete File</button>
-    </div>
-</form>
-
-    <div id="log-delete-vpn-file" class="log-box hidden mt-4"></div>
 </div>
 
-        </div>
-    </div>
-
-</div>
 
 {{-- OpenVPN Clients Table --}}
     
     <div class="mt-12 bg-white dark:bg-gray-900 shadow rounded-2xl p-6 overflow-x-auto">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 space-y-4 md:space-y-0">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                OpenVPN Clients
-            </h2>
 
-            <div>
-                <input
-                    type="text"
-                    id="search"
-                    name="search"
-                    placeholder="Search clients..."
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                    class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                />
-            </div>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+            OpenVPN Clients
+        </h2>
+
+        <button
+            id="toggle-clients-btn"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+            aria-expanded="false"
+        >
+            Show OpenVPN Clients
+        </button>
+    </div>
+
+    <div
+        id="openvpn-clients-content"
+        class="opacity-0 max-h-0 overflow-hidden transition-all duration-500 ease-in-out"
+        style="transition-property: max-height, opacity;"
+    >
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 space-y-4 md:space-y-0">
+            <input
+                type="text"
+                id="search"
+                name="search"
+                placeholder="Search clients..."
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+            />
         </div>
 
         @if (!empty($vpnClients))
@@ -197,6 +209,8 @@
             <p class="text-gray-500 dark:text-gray-400">No OpenVPN clients found.</p>
         @endif
     </div>
+</div>
+
     
 {{-- JavaScript --}}
 <script>
@@ -285,21 +299,42 @@ setupFormListener('form-delete-vpn-file', 'log-delete-vpn-file', '{{ route('task
 @endsection
 
 @push('scripts')
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('search');
-        const rows = document.querySelectorAll('#vpn-table tbody tr');
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('toggle-clients-btn');
+    const content = document.getElementById('openvpn-clients-content');
 
-        searchInput.addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase();
+    btn.addEventListener('click', () => {
+        const isHidden = content.classList.contains('opacity-0');
 
-            rows.forEach(row => {
-                const name = row.querySelector('.vpn-client-name').textContent.toLowerCase();
-                row.style.display = name.includes(searchTerm) ? '' : 'none';
-            });
+        if (isHidden) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.classList.remove('opacity-0');
+            content.classList.add('opacity-100');
+            btn.textContent = 'Hide OpenVPN Clients';
+            btn.setAttribute('aria-expanded', 'true');
+        } else {
+            content.style.maxHeight = '0';
+            content.classList.remove('opacity-100');
+            content.classList.add('opacity-0');
+            btn.textContent = 'Show OpenVPN Clients';
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Search 
+    const searchInput = document.getElementById('search');
+    const rows = document.querySelectorAll('#vpn-table tbody tr');
+
+    searchInput?.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        rows.forEach(row => {
+            const name = row.querySelector('.vpn-client-name').textContent.toLowerCase();
+            row.style.display = name.includes(searchTerm) ? '' : 'none';
         });
     });
+});
 </script>
+
 
 @endpush
