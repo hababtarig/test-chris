@@ -42,11 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Verquin UI (custom layout, not Breeze)
-
-Route::middleware(['auth', 'verified'])->get('/verquin-app', [OpenVpnClientList::class, 'listOpenVpnUsers'])->name('verquin');
+Route::middleware(['auth', 'verified'])
+    ->get('/verquin-app', fn () => view('verquin.dashboard'))
+    ->name('verquin');
 Route::prefix('verquin')->middleware(['auth', 'verified'])->group(function () {
-    Route::get('/user-management', fn () => view('verquin.user-management'))->name('verquin.user');
+ Route::get('/user-management', [OpenVpnClientList::class, 'listOpenVpnUsers'])->name('verquin.user');
     Route::get('/device-management', fn () => view('verquin.device-management'))->name('verquin.device');
     Route::get('/streaming', fn () => view('verquin.streaming'))->name('verquin.stream');
 });
@@ -54,17 +54,6 @@ Route::post('/verquin/user-management/create', [ScriptRunnerController::class, '
     ->name('user.create');
  Route::post('/user-management/create-openvpn-client', [OpenVpnClientController::class, 'createClient'])
         ->name('openvpn.client.create');
-
-/*Route::middleware(['auth', 'verified'])->get('/verquin-app', function () {
-    $users = User::all(); 
-   return view('verquin.dashboard', [
-    'users' => $users,
-    'vpnClients' => [],
-]); 
-
-
-})->name('verquin'); */
-
 
 
 Route::post('/verquin/user-management/delete', [DeleteUserController::class, 'delete'])->name('user.delete');
@@ -89,18 +78,22 @@ Route::get('/verquin/user-management/vpn-files/delete-log', [TaskStatusControlle
 
 Route::post('/verquin/device-management/vpn-device/create', [VpnDeviceController::class, 'create'])
     ->name('vpn.device.create');
-
-// Delete VPN device credentials
 Route::post('/verquin/device-management/vpn-device/delete', [VpnDeviceController::class, 'delete'])
     ->name('vpn.device.delete');
 
-// Fetch latest create log for frontend polling
 Route::get('/verquin/device-management/vpn-device/create-log', [TaskStatusController::class, 'latestCreateVpnDeviceLog'])
     ->name('task.latest-vpn-device-create-log');
-
-// Fetch latest delete log for frontend polling
 Route::get('/verquin/device-management/vpn-device/delete-log', [TaskStatusController::class, 'latestDeleteVpnDeviceLog'])
     ->name('task.latest-vpn-device-delete-log');
+
+    
+Route::prefix('verquin/streaming/sensor')->group(function () {
+    Route::post('/create', [HaproxySensorController::class, 'create'])->name('haproxy.sensor.create');
+    Route::post('/delete', [HaproxySensorController::class, 'delete'])->name('haproxy.sensor.delete');
+});
+
+Route::get('/task/log/haproxy-sensor/create', [TaskStatusController::class, 'latestHaproxySensorCreateLog'])->name('task.latest-haproxy-sensor-create-log');
+Route::get('/task/log/haproxy-sensor/delete', [TaskStatusController::class, 'latestHaproxySensorDeleteLog'])->name('task.latest-haproxy-sensor-delete-log');
 
 
 // Breeze auth scaffolding

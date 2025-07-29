@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class TaskStatusController extends Controller
 {
+    public function latestHaproxySensorCreateLog()
+{
+    return $this->respondWithTaskLog('add_haproxy_sensor');
+}
+
+public function latestHaproxySensorDeleteLog()
+{
+    return $this->respondWithTaskLog('delete_haproxy_sensor');
+}
+
     public function latestCreateVpnDeviceLog()
 {
     return $this->respondWithTaskLog('create_openvpn_device_creds');

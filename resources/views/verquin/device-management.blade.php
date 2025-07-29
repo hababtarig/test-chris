@@ -15,6 +15,7 @@
                         <label for="device-name-create" class="form-label">Device Name:</label>
                         <input type="text" name="device_name" id="device-name-create" required class="form-input w-80" placeholder="Device Name">
                     </div>
+                    <div>
                     <label for="device-ip-create" class="form-label">Device IP:</label>
   <input type="text" name="device_ip" id="device-ip-create" required class="form-input w-80" placeholder="10.8.0.x">
 </div>
@@ -148,6 +149,6 @@ setupFormListener(
     'Delete VPN Device'
 );
 
-</script> --}}
+</script> 
 @endsection
 
