@@ -12,6 +12,7 @@ use App\Http\Controllers\OpenVpnClientList;
 use App\Http\Controllers\VpnFileController;
 use App\Http\Controllers\VpnDeviceController;
 use App\Http\Controllers\HaproxySensorController;
+use App\Http\Controllers\FtpSensorController;
 
 
 
@@ -92,11 +93,16 @@ Route::get('/verquin/device-management/vpn-device/delete-log', [TaskStatusContro
 Route::prefix('verquin/streaming/sensor')->group(function () {
     Route::post('/create', [HaproxySensorController::class, 'create'])->name('haproxy.sensor.create');
     Route::post('/delete', [HaproxySensorController::class, 'delete'])->name('haproxy.sensor.delete');
+
+    Route::post('/ftp/create', [FtpSensorController::class, 'create'])->name('ftp.sensor.create');
+    Route::post('/ftp/delete', [FtpSensorController::class, 'delete'])->name('ftp.sensor.delete');
 });
 
+// Task log routes
 Route::get('/task/log/haproxy-sensor/create', [TaskStatusController::class, 'latestHaproxySensorCreateLog'])->name('task.latest-haproxy-sensor-create-log');
 Route::get('/task/log/haproxy-sensor/delete', [TaskStatusController::class, 'latestHaproxySensorDeleteLog'])->name('task.latest-haproxy-sensor-delete-log');
 
-
+Route::get('/task/log/ftp-sensor/create', [TaskStatusController::class, 'latestFtpSensorCreateLog'])->name('task.latest-ftp-sensor-create-log');
+Route::get('/task/log/ftp-sensor/delete', [TaskStatusController::class, 'latestFtpSensorDeleteLog'])->name('task.latest-ftp-sensor-delete-log');
 // Breeze auth scaffolding
 require __DIR__ . '/auth.php';

@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class TaskStatusController extends Controller
 {
+    public function latestFtpSensorCreateLog()
+{
+    return $this->respondWithTaskLog('add_ftp_sensor');
+}
+
+public function latestFtpSensorDeleteLog()
+{
+    return $this->respondWithTaskLog('delete_ftp_sensor');
+}
+
     public function latestHaproxySensorCreateLog()
 {
     return $this->respondWithTaskLog('add_haproxy_sensor');

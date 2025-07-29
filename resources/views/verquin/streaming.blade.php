@@ -62,6 +62,51 @@
     </div>
 </div>
 
+
+<div class="mt-12 space-y-6">
+    <h2 class="text-xl font-semibold mb-4">FTP Alerts Management</h2>
+    <div class="bg-white shadow rounded-lg border p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {{-- Create FTP Sensor --}}
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Create FTP Alert</h3>
+                <form id="form-create-ftp-sensor" action="{{ route('ftp.sensor.create') }}" method="POST" autocomplete="off" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label for="ftp-sensor-name-create" class="form-label">Sensor Name:</label>
+                        <input type="text" name="sensor_name" id="ftp-sensor-name-create" required class="form-input w-80" placeholder="Sensor Name">
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="form-button-blue">Add FTP Alert</button>
+                    </div>
+                </form>
+                <div id="log-create-ftp-sensor" class="log-box hidden mt-4"></div>
+            </div>
+
+            {{-- Delete FTP Sensor --}}
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Delete FTP Alert</h3>
+                <form id="form-delete-ftp-sensor" action="{{ route('ftp.sensor.delete') }}" method="POST" autocomplete="off" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label for="ftp-sensor-name-delete" class="form-label">Sensor Name:</label>
+                        <input type="text" name="sensor_name" id="ftp-sensor-name-delete" required class="form-input w-80" placeholder="Sensor Name">
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="form-button-red">Delete FTP Alert</button>
+                    </div>
+                </form>
+                <div id="log-delete-ftp-sensor" class="log-box hidden mt-4"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
 {{-- JS --}}
 <script>
 const logIntervals = {};
@@ -145,6 +190,22 @@ setupFormListener(
     'delete_haproxy_sensor',
     'Delete HAProxy Sensor'
 );
+setupFormListener(
+    'form-create-ftp-sensor',
+    'log-create-ftp-sensor',
+    '{{ route('task.latest-ftp-sensor-create-log') }}',
+    'create_ftp_sensor',
+    'Create FTP Sensor'
+);
+
+setupFormListener(
+    'form-delete-ftp-sensor',
+    'log-delete-ftp-sensor',
+    '{{ route('task.latest-ftp-sensor-delete-log') }}',
+    'delete_ftp_sensor',
+    'Delete FTP Sensor'
+);
+
 </script>
 @endsection
 
