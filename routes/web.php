@@ -11,6 +11,8 @@ use \App\Http\Controllers\TaskStatusController;
 use App\Http\Controllers\OpenVpnClientList;
 use App\Http\Controllers\VpnFileController;
 use App\Http\Controllers\VpnDeviceController;
+use App\Http\Controllers\HaproxySensorController;
+
 
 
 // Redirect root to login
