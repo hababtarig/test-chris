@@ -9,4 +9,7 @@ class Task extends Model
     protected $fillable = [
         'type', 'server', 'username', 'status', 'log'
     ];
+     protected $attributes = [
+        'username' => '',
+    ];
 }

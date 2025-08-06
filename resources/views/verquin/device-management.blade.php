@@ -24,7 +24,7 @@
   <input type="text" name="device_subnet" id="device-subnet-create" required class="form-input w-80" placeholder="255.255.255.0">
 </div>            
                     <div class="pt-2">
-                        <button type="submit" class="form-button-blue">Create Device</button>
+                        <button type="submit" class="form-button-blue">Create Credentials</button>
                     </div>
                 </form>
                 <div id="log-create-vpn-device" class="log-box hidden mt-4"></div>
@@ -49,7 +49,7 @@
 </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="form-button-red">Delete Device</button>
+                        <button type="submit" class="form-button-red">Delete Credentials</button>
                     </div>
                 </form>
                 <div id="log-delete-vpn-device" class="log-box hidden mt-4"></div>

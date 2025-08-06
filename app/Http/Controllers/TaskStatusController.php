@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class TaskStatusController extends Controller
 {
+    public function latestOpenVpnCredsAddS3Log()
+{
+    return $this->respondWithTaskLog('openvpn_creds_add_s3');
+}
+
+public function latestOpenVpnCredsDeleteS3Log()
+{
+    return $this->respondWithTaskLog('openvpn_creds_delete_s3');
+}
+
     public function latestFtpSensorCreateLog()
 {
     return $this->respondWithTaskLog('add_ftp_sensor');

@@ -13,6 +13,7 @@ use App\Http\Controllers\VpnFileController;
 use App\Http\Controllers\VpnDeviceController;
 use App\Http\Controllers\HaproxySensorController;
 use App\Http\Controllers\FtpSensorController;
+use App\Http\Controllers\OpenVpnCredsS3Controller;
 
 
 
@@ -104,5 +105,16 @@ Route::get('/task/log/haproxy-sensor/delete', [TaskStatusController::class, 'lat
 
 Route::get('/task/log/ftp-sensor/create', [TaskStatusController::class, 'latestFtpSensorCreateLog'])->name('task.latest-ftp-sensor-create-log');
 Route::get('/task/log/ftp-sensor/delete', [TaskStatusController::class, 'latestFtpSensorDeleteLog'])->name('task.latest-ftp-sensor-delete-log');
-// Breeze auth scaffolding
+
+// Actions
+Route::post('/verquin/user-management/vpn-creds/s3-add', [OpenVpnCredsS3Controller::class, 'add'])->name('vpn.creds.s3.add');
+Route::post('/verquin/user-management/vpn-creds/s3-delete', [OpenVpnCredsS3Controller::class, 'delete'])->name('vpn.creds.s3.delete');
+
+// Task logs
+Route::get('/verquin/user-management/vpn-creds/s3-add-log', [TaskStatusController::class, 'latestOpenVpnCredsAddS3Log'])->name('task.latest-openvpn-creds-add-s3-log');
+Route::get('/verquin/user-management/vpn-creds/s3-delete-log', [TaskStatusController::class, 'latestOpenVpnCredsDeleteS3Log'])->name('task.latest-openvpn-creds-delete-s3-log');
+
+
+
+
 require __DIR__ . '/auth.php';

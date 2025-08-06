@@ -150,6 +150,56 @@
         <div id="log-delete-vpn-file" class="log-box hidden mt-4"></div>
     </div>
 </div>
+{{-- S3 Credential Management --}}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+    {{-- Add VPN Creds to S3 --}}
+    <div>
+        <h3 class="text-lg font-semibold mb-4">Upload VPN Creds to S3</h3>
+        <form id="form-add-s3-creds" action="{{ route('vpn.creds.s3.add') }}" method="POST" autocomplete="off" class="space-y-4">
+            @csrf
+            <div>
+                <label for="s3-cert-name" class="form-label">Cert Filename</label>
+                <input type="text" id="s3-cert-name" name="cert_name" required class="form-input w-80" placeholder="Enter Cert filename">
+            </div>
+            <div>
+                <label for="s3-key-name" class="form-label">Key Filename</label>
+                <input type="text" id="s3-key-name" name="key_name" required class="form-input w-80" placeholder="Enter Key filename">
+            </div>
+            <div>
+                <label for="s3-ovpn-name" class="form-label">OVPN Filename</label>
+                <input type="text" id="s3-ovpn-name" name="ovpn_name" required class="form-input w-80" placeholder="Enter OVPN filename">
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="form-button-blue">Upload to S3</button>
+            </div>
+        </form>
+        <div id="log-add-s3-creds" class="log-box hidden mt-4"></div>
+    </div>
+
+    {{-- Delete VPN Creds from S3 --}}
+    <div>
+        <h3 class="text-lg font-semibold mb-4">Delete VPN Creds from S3</h3>
+        <form id="form-delete-s3-creds" action="{{ route('vpn.creds.s3.delete') }}" method="POST" autocomplete="off" class="space-y-4">
+            @csrf
+            <div>
+                <label for="s3-del-cert-name" class="form-label">Cert Filename</label>
+                <input type="text" id="s3-del-cert-name" name="cert_name" required class="form-input w-80" placeholder="Enter Cert filename">
+            </div>
+            <div>
+                <label for="s3-del-key-name" class="form-label">Key Filename</label>
+                <input type="text" id="s3-del-key-name" name="key_name" required class="form-input w-80" placeholder="Enter Key filename">
+            </div>
+            <div>
+                <label for="s3-del-ovpn-name" class="form-label">OVPN Filename</label>
+                <input type="text" id="s3-del-ovpn-name" name="ovpn_name" required class="form-input w-80" placeholder="Enter OVPN filename">
+            </div>
+            <div class="pt-2">
+                <button type="submit" class="form-button-red">Delete from S3</button>
+            </div>
+        </form>
+        <div id="log-delete-s3-creds" class="log-box hidden mt-4"></div>
+    </div>
+</div>
 
 
 {{-- OpenVPN Clients Table --}}
@@ -294,6 +344,21 @@
     setupFormListener('form-delete-openvpn', 'log-delete-openvpn', '{{ route('task.latest-openvpn-delete-log') }}', 'delete_ovpn', 'Delete OVPN');
     setupFormListener('form-create-vpn-file', 'log-create-vpn-file', '{{ route('task.latest-vpn-file-create-log') }}', 'create_vpn_file', 'Create VPN File');
 setupFormListener('form-delete-vpn-file', 'log-delete-vpn-file', '{{ route('task.latest-vpn-file-delete-log') }}', 'delete_vpn_file', 'Delete VPN File');
+setupFormListener(
+    'form-add-s3-creds',
+    'log-add-s3-creds',
+    '{{ route('task.latest-openvpn-creds-add-s3-log') }}',
+    'add_s3_creds',
+    'Upload to S3'
+);
+
+setupFormListener(
+    'form-delete-s3-creds',
+    'log-delete-s3-creds',
+    '{{ route('task.latest-openvpn-creds-delete-s3-log') }}',
+    'delete_s3_creds',
+    'Delete from S3'
+);
 
 </script>
 @endsection
