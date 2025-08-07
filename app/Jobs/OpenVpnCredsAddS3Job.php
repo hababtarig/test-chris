@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Jobs;
 
@@ -18,16 +18,20 @@ class OpenVpnCredsAddS3Job implements ShouldQueue
     protected string $keyName;
     protected string $ovpnName;
 
-    public function __construct(string $certName, string $keyName, string $ovpnName)
+    public function __construct(?string $certName = '', ?string $keyName = '', ?string $ovpnName = '')
     {
-        $this->certName = $certName;
-        $this->keyName = $keyName;
-        $this->ovpnName = $ovpnName;
+        $this->certName = $certName ?? '';
+        $this->keyName  = $keyName ?? '';
+        $this->ovpnName = $ovpnName ?? '';
     }
 
     public function handle(): void
     {
-        Log::info('✅ OpenVpnCredsAddS3Job handle() method running');
+        if (empty($this->certName) && empty($this->keyName) && empty($this->ovpnName)) {
+            Log::error('❌ OpenVpnCredsAddS3Job: No filenames provided');
+            return;
+        }
+
         $task = Task::create([
             'type'     => 'openvpn_creds_add_s3',
             'server'   => 'vpn',
@@ -47,12 +51,12 @@ class OpenVpnCredsAddS3Job implements ShouldQueue
             return;
         }
 
-        $ansibleCmd = sprintf(
-            'ansible-playbook /home/ubuntu/ansible-playbooks/s3-vpn-creds-add.yml -e cert_name=%s -e key_name=%s -e ovpn_name=%s',
-            escapeshellarg($this->certName),
-            escapeshellarg($this->keyName),
-            escapeshellarg($this->ovpnName)
-        );
+        $args = [];
+        if ($this->certName) $args[] = '-e cert_name=' . escapeshellarg($this->certName);
+        if ($this->keyName)  $args[] = '-e key_name=' . escapeshellarg($this->keyName);
+        if ($this->ovpnName) $args[] = '-e ovpn_name=' . escapeshellarg($this->ovpnName);
+
+        $ansibleCmd = 'ansible-playbook /home/ubuntu/ansible-playbooks/s3-vpn-creds-add.yml ' . implode(' ', $args);
 
         $sshCmd = sprintf(
             'ssh -i %s -o StrictHostKeyChecking=no %s@%s "%s"',

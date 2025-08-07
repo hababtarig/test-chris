@@ -159,15 +159,15 @@
             @csrf
             <div>
                 <label for="s3-cert-name" class="form-label">Cert Filename</label>
-                <input type="text" id="s3-cert-name" name="cert_name" required class="form-input w-80" placeholder="Enter Cert filename">
+                <input type="text" id="s3-cert-name" name="cert_name"  class="form-input w-80" placeholder="Enter Cert filename">
             </div>
             <div>
                 <label for="s3-key-name" class="form-label">Key Filename</label>
-                <input type="text" id="s3-key-name" name="key_name" required class="form-input w-80" placeholder="Enter Key filename">
+                <input type="text" id="s3-key-name" name="key_name"  class="form-input w-80" placeholder="Enter Key filename">
             </div>
             <div>
                 <label for="s3-ovpn-name" class="form-label">OVPN Filename</label>
-                <input type="text" id="s3-ovpn-name" name="ovpn_name" required class="form-input w-80" placeholder="Enter OVPN filename">
+                <input type="text" id="s3-ovpn-name" name="ovpn_name"  class="form-input w-80" placeholder="Enter OVPN filename">
             </div>
             <div class="pt-2">
                 <button type="submit" class="form-button-blue">Upload to S3</button>
@@ -183,15 +183,15 @@
             @csrf
             <div>
                 <label for="s3-del-cert-name" class="form-label">Cert Filename</label>
-                <input type="text" id="s3-del-cert-name" name="cert_name" required class="form-input w-80" placeholder="Enter Cert filename">
+                <input type="text" id="s3-del-cert-name" name="cert_name"  class="form-input w-80" placeholder="Enter Cert filename">
             </div>
             <div>
                 <label for="s3-del-key-name" class="form-label">Key Filename</label>
-                <input type="text" id="s3-del-key-name" name="key_name" required class="form-input w-80" placeholder="Enter Key filename">
+                <input type="text" id="s3-del-key-name" name="key_name"  class="form-input w-80" placeholder="Enter Key filename">
             </div>
             <div>
                 <label for="s3-del-ovpn-name" class="form-label">OVPN Filename</label>
-                <input type="text" id="s3-del-ovpn-name" name="ovpn_name" required class="form-input w-80" placeholder="Enter OVPN filename">
+                <input type="text" id="s3-del-ovpn-name" name="ovpn_name"  class="form-input w-80" placeholder="Enter OVPN filename">
             </div>
             <div class="pt-2">
                 <button type="submit" class="form-button-red">Delete from S3</button>

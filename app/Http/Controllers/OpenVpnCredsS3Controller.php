@@ -14,52 +14,55 @@ class OpenVpnCredsS3Controller extends Controller
 
 public function add(Request $request)
 {
-    try {
-        $validated = $request->validate([
-            'cert_name' => 'required|string|alpha_dash',
-            'key_name'  => 'required|string|alpha_dash',
-            'ovpn_name' => 'required|string|alpha_dash',
-        ]);
+    $validated = $request->validate([
+        'cert_name' => 'nullable|string|alpha_dash',
+        'key_name'  => 'nullable|string|alpha_dash',
+        'ovpn_name' => 'nullable|string|alpha_dash',
+    ]);
 
-        OpenVpnCredsAddS3Job::dispatch(
-            $validated['cert_name'],
-            $validated['key_name'],
-            $validated['ovpn_name']
-        );
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => "🕒 Uploading VPN credentials to S3 for '{$validated['cert_name']}'..."
-            ]);
-        }
-
-        return back()->with('success', "🕒 Uploading VPN credentials to S3 for '{$validated['cert_name']}'...");
-    } catch (ValidationException $e) {
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => '⚠️ Validation failed.',
-                'errors' => $e->errors()
-            ], 422);
-        }
-
-        throw $e;
+    if (empty($validated['cert_name']) && empty($validated['key_name']) && empty($validated['ovpn_name'])) {
+        return response()->json([
+            'message' => '⚠️ At least one filename must be provided.'
+        ], 422);
     }
+
+    OpenVpnCredsAddS3Job::dispatch(
+        $validated['cert_name'] ?? '',
+        $validated['key_name'] ?? '',
+        $validated['ovpn_name'] ?? ''
+    );
+
+    if ($request->wantsJson()) {
+        return response()->json([
+            'message' => "🕒 Uploading VPN credentials to S3..."
+        ]);
+    }
+
+    return back()->with('success', "🕒 Uploading VPN credentials to S3...");
 }
 
+
     public function delete(Request $request)
-    {
-        $validated = $request->validate([
-            'cert_name' => 'required|string|alpha_dash',
-            'key_name'  => 'required|string|alpha_dash',
-            'ovpn_name' => 'required|string|alpha_dash',
-        ]);
+{
+    $validated = $request->validate([
+        'cert_name' => 'nullable|string|alpha_dash',
+        'key_name'  => 'nullable|string|alpha_dash',
+        'ovpn_name' => 'nullable|string|alpha_dash',
+    ]);
 
-        OpenVpnCredsDeleteS3Job::dispatch(
-            $validated['cert_name'],
-            $validated['key_name'],
-            $validated['ovpn_name']
-        );
-
-        return response()->json(['message' => 'VPN credentials delete job dispatched.']);
+    if (empty($validated['cert_name']) && empty($validated['key_name']) && empty($validated['ovpn_name'])) {
+        return response()->json([
+            'message' => '⚠️ At least one filename must be provided.'
+        ], 422);
     }
+
+    OpenVpnCredsDeleteS3Job::dispatch(
+        $validated['cert_name'] ?? '',
+        $validated['key_name'] ?? '',
+        $validated['ovpn_name'] ?? ''
+    );
+
+    return response()->json(['message' => '🕒 Deleting VPN credentials from S3...']);
+}
+
 }
